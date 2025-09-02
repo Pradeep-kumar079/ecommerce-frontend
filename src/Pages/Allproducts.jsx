@@ -2,7 +2,7 @@ import React from 'react';
 import Cloths from '../components/Cloths';
 import Electronics from '../components/Electronics';
 import HomeAppliances from '../Pages/HomeAppliances';
-import CombineProducts from '../components/CombineProducts';
+import CombineProducts from '../Pages/CombineProducts';
 
 const AllProducts = () => {
   return (
