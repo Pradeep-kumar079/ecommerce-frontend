@@ -1,7 +1,7 @@
 {
   "name": "client",
   "version": "0.1.0",
-  "proxy": "process.env.REACT_APP_API_URL",
+  "proxy": "https://ecommerce-backend-4hva.onrender.com",
   "private": true,
   "dependencies": {
     "@fortawesome/free-solid-svg-icons": "^7.0.0",
