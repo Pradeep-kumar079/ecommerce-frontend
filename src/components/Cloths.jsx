@@ -5,7 +5,7 @@ import "./Cloth.css";
 
 const Cloths = () => {
   const [cloths, setCloths] = useState([]);
-  const BASE_IMAGE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+  const BASE_IMAGE_URL = process.env.REACT_APP_API_URL;
 
   const fetchCloths = useCallback(async () => {
     try {

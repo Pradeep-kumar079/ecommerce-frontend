@@ -7,7 +7,7 @@ import axios from 'axios';
 const Admin = () => {
   const [products, setProducts] = useState({});
   const [loading, setLoading] = useState(true);
-  const APP_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+  const APP_URL = process.env.REACT_APP_API_URL;
 
   // useCallback ensures fetchProducts identity doesn't change, preventing useEffect warnings
   const fetchProducts = useCallback(async () => {

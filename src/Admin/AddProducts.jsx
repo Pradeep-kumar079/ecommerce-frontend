@@ -85,7 +85,7 @@ const Addproduct = () => {
   });
 
   // Netlify-safe API URL
- const APP_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";  // line ~141
+ const APP_URL = process.env.REACT_APP_API_URL;  // line ~141
 
 
   const handleChange = (e) => {
