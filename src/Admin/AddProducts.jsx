@@ -3,7 +3,6 @@ import axios from "axios";
 import "./AddProducts.css";
 
 // Category → Type → Attributes mapping
- 
 const categoryTypeAttributes = {
   electronics: {
     smartphone: ["brand", "RAM", "storage", "battery", "color"],
@@ -81,11 +80,13 @@ const Addproduct = () => {
     price: "",
     stock: "",
     description: "",
-    images: [], // multiple images
+    images: [],
     attributes: {},
   });
 
-  const APP_URL = process.env.REACT_APP_API_URL;
+  // Netlify-safe API URL
+  const APP_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setProduct((prev) => ({
@@ -123,12 +124,10 @@ const Addproduct = () => {
     }
 
     try {
-      const response = await axios.post(
-        `${APP_URL}/api/admin/add-product`,
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
-      alert(" Product added successfully!");
+      const response = await axios.post(`${APP_URL}/api/admin/add-product`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      alert("Product added successfully!");
       console.log(response.data);
 
       setProduct({
@@ -141,9 +140,8 @@ const Addproduct = () => {
         images: [],
         attributes: {},
       });
-      e.target.reset();
     } catch (err) {
-      console.error(" Upload failed:", err);
+      console.error("Upload failed:", err);
       alert(err.response?.data?.msg || "Failed to add product");
     }
   };
@@ -156,7 +154,9 @@ const Addproduct = () => {
         key={attr}
         name={attr}
         placeholder={attr.charAt(0).toUpperCase() + attr.slice(1)}
+        value={product.attributes[attr] || ""}
         onChange={handleAttributeChange}
+        required
       />
     ));
   };
@@ -191,7 +191,6 @@ const Addproduct = () => {
           <input type="number" name="stock" placeholder="Stock Quantity" value={product.stock} onChange={handleChange} required />
           <textarea name="description" placeholder="Description" value={product.description} onChange={handleChange} required />
 
-          {/* Dynamic attributes */}
           {renderAttributesFields()}
 
           <input type="file" accept="image/*" name="images" onChange={handleImageChange} multiple required />

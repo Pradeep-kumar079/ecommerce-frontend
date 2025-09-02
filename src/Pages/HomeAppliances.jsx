@@ -5,16 +5,22 @@ import './HomeAppliances.css';
 
 const HomeAppliances = () => {
   const [homeAppliances, setHomeAppliances] = useState([]);
-  const BASE_IMAGE_URL = process.env.REACT_APP_API_URL; // include host
+  const BASE_IMAGE_URL = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
-    axios.get(`${BASE_IMAGE_URL}/api/home/all-products`)
-      .then(res => {
+    const fetchHomeAppliances = async () => {
+      try {
+        const res = await axios.get(`${BASE_IMAGE_URL}/api/home/all-products`);
+        // Filter only home appliances
         const homeApplianceItems = res.data.filter(p => p.category === "home-appliances");
         setHomeAppliances(homeApplianceItems);
-      })
-      .catch(err => console.error("Error fetching home appliances:", err));
-  }, []);
+      } catch (err) {
+        console.error("Error fetching home appliances:", err);
+      }
+    };
+
+    fetchHomeAppliances();
+  }, [BASE_IMAGE_URL]);
 
   return (
     <div className="home-appliances-container">

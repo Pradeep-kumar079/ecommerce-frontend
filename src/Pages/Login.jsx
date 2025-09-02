@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
 import axios from 'axios';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import jwtDecode from 'jwt-decode';
 import './Login.css';
@@ -8,13 +8,14 @@ function Login() {
   const [data, setData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const APP_URL = process.env.REACT_APP_API_URL; // ✅ use environment variable
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const res = await axios.post('/api/auth/login', data);
+      const res = await axios.post(`${APP_URL}/api/auth/login`, data); // ✅ prefixed with APP_URL
 
       alert('Login Successful');
 

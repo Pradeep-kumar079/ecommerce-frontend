@@ -13,174 +13,139 @@ const Account = () => {
     address: "",
     city: "",
     state: "",
-    zip: ""
+    zip: "",
   });
 
   const [orders, setOrders] = useState([]);
-  const [cartItems , setCartItems] = useState([]);
+  const [cartItems, setCartItems] = useState([]);
+  const [loggedOut, setLoggedOut] = useState(false);
+
   const REACT_APP_API_URL = process.env.REACT_APP_API_URL;
 
-    useEffect(() => {
-      const fetchUser = async () => {
-        try {
-          const token = localStorage.getItem("token");
-          if (!token) return;
-
-          const res = await fetch(`${REACT_APP_API_URL}/api/user/`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-
-          if (!res.ok) {
-            const errData = await res.json();
-            console.error("Error fetching user:", errData);
-            return;
-          }
-
-          const data = await res.json();
-          setUser({
-            username: data.username || data.username || "",
-            email: data.email || "",
-            phone: data.phone || "",
-            address: data.address || "",
-            city: data.city || "",
-            state: data.state || "",
-            zip: data.zip || "",
-            gender: data.gender || ""
-          });
-        } catch (err) {
-          console.error("Error fetching user:", err);
-        }
-      };
-
-      fetchUser();
-    }, []);
-
-    // Handle input changes
-    const handleChange = (e) => {
-      const { name, value } = e.target;
-      setUser((prev) => ({ ...prev, [name]: value }));
-    };
-
-    // Save updated user info to backend
-    const handleSave = async () => {
+  // Fetch user info
+  useEffect(() => {
+    const fetchUser = async () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
-          alert("Not logged in!");
+          setLoggedOut(true);
           return;
         }
 
         const res = await fetch(`${REACT_APP_API_URL}/api/user/`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // ✅ FIXED
-          },
-          body: JSON.stringify(user),
+          headers: { Authorization: `Bearer ${token}` },
         });
-
-        const data = await res.json();
 
         if (!res.ok) {
-          console.error("Error updating user:", data);
-          alert("Failed to update profile");
+          setLoggedOut(true);
           return;
         }
 
-        alert("Profile updated successfully!");
-        console.log("Update response data:", data);
-        setUser(data);
-      } catch (err) {
-        console.error("Error updating user:", err);
-      }
-    };
-
-
-    const fetchOrders = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          console.error("No token found, user not logged in");
-          Navigate("/login");
-          return;
-        }
-
-        const response = await fetch(`${REACT_APP_API_URL}/api/user/get-orders`, {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-          },
+        const data = await res.json();
+        setUser({
+          username: data.username || "",
+          gender: data.gender || "",
+          email: data.email || "",
+          phone: data.phone || "",
+          address: data.address || "",
+          city: data.city || "",
+          state: data.state || "",
+          zip: data.zip || "",
         });
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error("Error response:", response.status, errorText);
-          return;
-        }
-
-        const data = await response.json();
-        setOrders(data.orders);
-        console.log("Fetched orders:", data.orders);
       } catch (err) {
-        console.error("Error fetching orders:", err);
+        console.error("Error fetching user:", err);
       }
     };
 
-    const fetchCartItems = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          console.error("No token found, user not logged in");
-          return;
-        }
+    fetchUser();
+  }, []);
 
-        const response = await fetch(`${REACT_APP_API_URL}/api/cart/`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const data = await response.json();
-        console.log("Cart API response:", data);
-
-        // ✅ Fix: correct path
-        setCartItems(data.cart && data.cart.items ? data.cart.items : []);
-      } catch (err) {
-        console.error("Error fetching cart items:", err);
+  // Fetch orders
+  const fetchOrders = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setLoggedOut(true);
+        return;
       }
-    };
-    const updateUserData = async () => {
-     try {
-       const token = localStorage.getItem("token");
-       if (!token) {
-         alert("Not logged in!");
-         return;
-       }
+
+      const res = await fetch(`${REACT_APP_API_URL}/api/user/get-orders`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (res.ok) setOrders(data.orders || []);
+    } catch (err) {
+      console.error("Error fetching orders:", err);
+    }
+  };
+
+  // Fetch cart items
+  const fetchCartItems = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setLoggedOut(true);
+        return;
+      }
+
+      const res = await fetch(`${REACT_APP_API_URL}/api/cart/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      setCartItems(data.cart?.items || []);
+    } catch (err) {
+      console.error("Error fetching cart items:", err);
+    }
+  };
+
+  // Handle input change
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setUser((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Save profile
+  const handleSave = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Not logged in!");
+        return;
+      }
 
       const res = await fetch(`${REACT_APP_API_URL}/api/user/`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(user),
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(user),
       });
 
-       const data = await res.json();
+      const data = await res.json();
 
-       if (!res.ok) {
-         console.error("Error updating user:", data);
-         alert("Failed to update profile");
-         return;
-       }
-       console.log("Update response data:", data);
-       alert("Profile updated successfully!");
-       setUser(data);
-     } catch (err) {
-       console.error("Error updating user:", err);
-     }
-   };
+      if (!res.ok) {
+        alert("Failed to update profile");
+        return;
+      }
+
+      alert("Profile updated successfully!");
+      setUser(data);
+    } catch (err) {
+      console.error("Error updating profile:", err);
+    }
+  };
+
+  // Logout
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setLoggedOut(true);
+  };
+
+  // Redirect if not logged in
+  if (loggedOut) return <Navigate to="/login" />;
+
+  const BASE_IMAGE_URL = REACT_APP_API_URL;
 
   return (
     <div>
@@ -190,6 +155,7 @@ const Account = () => {
         {/* Sidebar */}
         <div className="Details">
           <h2>Account Details</h2>
+
           <div className="buttons">
             <button
               className={activeSection === "profile" ? "activeBtn" : ""}
@@ -250,7 +216,10 @@ const Account = () => {
           <div className="buttons">
             <button
               className={activeSection === "cart" ? "activeBtn" : ""}
-              onClick={() => setActiveSection("cart")}
+              onClick={() => {
+                setActiveSection("cart");
+                fetchCartItems();
+              }}
             >
               Cart Items
             </button>
@@ -270,107 +239,75 @@ const Account = () => {
 
           <div className="logout">
             <div className="buttons">
-              <button
-                onClick={() => {
-                  localStorage.removeItem("token");
-                  window.location.href = "/login";
-                }}
-              >
-                Logout
-              </button>
+              <button onClick={handleLogout}>Logout</button>
             </div>
           </div>
         </div>
 
         {/* Right Content */}
         <div className="mainActionDetails">
+          {/* Profile */}
           {activeSection === "profile" && (
             <div className="DetailsPersonal">
               <h2>Profile Information</h2>
-              <label htmlFor="name">Username</label>
+              <label>Username</label>
               <input
                 type="text"
                 name="username"
-                value={user.username || " "}
+                value={user.username}
                 onChange={handleChange}
               />
-
-              <label htmlFor="gender">Gender</label>
-              <select
-                name="gender"
-                id="gender"
-                value={user.gender || " "}
-                onChange={handleChange}
-              >
+              <label>Gender</label>
+              <select name="gender" value={user.gender} onChange={handleChange}>
                 <option value="">Select</option>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
                 <option value="other">Other</option>
               </select>
-
-              <label htmlFor="email">Email</label>
+              <label>Email</label>
               <input
                 type="email"
                 name="email"
-                value={user.email || " "}
+                value={user.email}
                 onChange={handleChange}
               />
-
-              <label htmlFor="phone">Phone Number</label>
+              <label>Phone Number</label>
               <input
                 type="tel"
                 name="phone"
-                value={user.phone || " "}
+                value={user.phone}
                 onChange={handleChange}
               />
-
               <button className="saveBtn" onClick={handleSave}>
                 Save Changes
               </button>
             </div>
           )}
 
+          {/* Address */}
           {activeSection === "address" && (
             <div className="DetailsAddress">
               <h2>Manage Address</h2>
-              <label htmlFor="address">Address</label>
+              <label>Address</label>
               <input
                 type="text"
                 name="address"
-                value={user.address || " "}
+                value={user.address}
                 onChange={handleChange}
               />
-
-              <label htmlFor="city">City</label>
-              <input
-                type="text"
-                name="city"
-                value={user.city || " "}
-                onChange={handleChange}
-              />
-
-              <label htmlFor="state">State</label>
-              <input
-                type="text"
-                name="state"
-                value={user.state || " "}
-                onChange={handleChange}
-              />
-
-              <label htmlFor="zip">Zip Code</label>
-              <input
-                type="text"
-                name="zip"
-                value={user.zip || " "}
-                onChange={handleChange}
-              />
-
+              <label>City</label>
+              <input type="text" name="city" value={user.city} onChange={handleChange} />
+              <label>State</label>
+              <input type="text" name="state" value={user.state} onChange={handleChange} />
+              <label>Zip Code</label>
+              <input type="text" name="zip" value={user.zip} onChange={handleChange} />
               <button className="saveBtn" onClick={handleSave}>
                 Save Address
               </button>
             </div>
           )}
 
+          {/* Payment */}
           {activeSection === "payment" && (
             <div>
               <h2>Payment Methods</h2>
@@ -378,56 +315,64 @@ const Account = () => {
             </div>
           )}
 
+          {/* Orders */}
           {activeSection === "orders" && (
-        <div className="orderActions">
-          <h2>Your Orders</h2>
+            <div className="orderActions">
+              <h2>Your Orders</h2>
+              {orders.length === 0 ? (
+                <p>No orders found.</p>
+              ) : (
+                orders.map((order) => (
+                  <div key={order._id} className="order-card">
+                    <h3>Order id: {order._id}</h3>
+                    <p>
+                      <strong>Status:</strong> {order.orderStatus}
+                    </p>
+                    <p>
+                      <strong>Total:</strong> ₹{order.totalAmount}
+                    </p>
+                    <p>
+                      <strong>Payment Method:</strong> {order.paymentMethod}
+                    </p>
+                    <p>
+                      <strong>Payment Status:</strong> {order.paymentStatus}
+                    </p>
+                    <p>
+                      <strong>Placed on:</strong>{" "}
+                      {new Date(order.createdAt).toLocaleDateString()}
+                    </p>
 
-          {orders.length === 0 ? (
-          <p>No orders found.</p>
-          ) : (
-          orders.map((order) => (
-          <div key={order._id} className="order-card">
-          <h3>Order id : {order._id}</h3>
-          <p><strong>Status:</strong> {order.orderStatus}</p>
-          <p><strong>Total:</strong> ₹{order.totalAmount}</p>
-          <p><strong>Payment Method:</strong> {order.paymentMethod}</p>
-          <p><strong>Payment Status:</strong> {order.paymentStatus}</p>
-          <p><strong>Placed on:</strong> {new Date(order.createdAt).toLocaleDateString()}</p>
-
-          <h4>Products:</h4>
-          {order.orderItems && order.orderItems.length > 0 ? (
-          order.orderItems.map((item, index) => (
-          <div key={index} className="product-item">
-          {item.product ? (
-            <>
-              <img
-                src={`${REACT_APP_API_URL}${item.product.images}`}
-                alt={item.product.name}
-              />
-              <div className="product-details">
-                <p className="product-name">{item.product.name}</p>
-                <p>Quantity: {item.quantity}</p>
-                <p>Price: ₹{item.price}</p>
-              </div>
-            </>
-          ) : (
-            <p>Product details not available</p>
+                    <h4>Products:</h4>
+                    {order.orderItems?.length > 0 ? (
+                      order.orderItems.map((item, idx) => (
+                        <div key={idx} className="product-item">
+                          {item.product ? (
+                            <>
+                              <img
+                                src={`${BASE_IMAGE_URL}${item.product.images?.[0]}`}
+                                alt={item.product.name}
+                              />
+                              <div className="product-details">
+                                <p>{item.product.name}</p>
+                                <p>Quantity: {item.quantity}</p>
+                                <p>Price: ₹{item.price}</p>
+                              </div>
+                            </>
+                          ) : (
+                            <p>Product details not available</p>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <p>No products found in this order.</p>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
           )}
-          </div>
-          ))
-          ) : (
-          <p>No products found in this order.</p>
-          )}
-          </div>
-          ))
-          )}
-          </div>
 
-          )}
-
-
-
-
+          {/* Track */}
           {activeSection === "track" && (
             <div>
               <h2>Track Order</h2>
@@ -435,13 +380,15 @@ const Account = () => {
             </div>
           )}
 
+          {/* Support */}
           {activeSection === "support" && (
-            <div className="supportActions">
+            <div>
               <h2>Customer Support</h2>
               <p>Contact us at support@example.com or call 1800-123-456</p>
             </div>
           )}
 
+          {/* FAQ */}
           {activeSection === "faq" && (
             <div>
               <h2>FAQ</h2>
@@ -449,19 +396,30 @@ const Account = () => {
             </div>
           )}
 
-         {activeSection === "cart" && (
+          {/* Cart */}
+          {activeSection === "cart" && (
             <div>
               <h2>Cart Items</h2>
-              <ul>
-                {cartItems.length > 0 ? (
-                  cartItems.map((item) => (
-                    <li key={item._id} style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}>
+              {cartItems.length === 0 ? (
+                <p>No items in cart</p>
+              ) : (
+                <ul>
+                  {cartItems.map((item) => (
+                    <li
+                      key={item._id || item.productId?._id}
+                      style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}
+                    >
                       {item.productId ? (
                         <>
                           <img
-                            src={item.productId.images}
+                            src={`${BASE_IMAGE_URL}${item.productId.images?.[0]}`}
                             alt={item.productId.name}
-                            style={{ width: "50px", height: "50px", objectFit: "cover", marginRight: "10px" }}
+                            style={{
+                              width: "50px",
+                              height: "50px",
+                              objectFit: "cover",
+                              marginRight: "10px",
+                            }}
                           />
                           <span>
                             {item.productId.name} - ₹{item.productId.price} × {item.quantity}
@@ -471,15 +429,13 @@ const Account = () => {
                         <span>Product details not available</span>
                       )}
                     </li>
-                  ))
-                ) : (
-                  <li>No items in cart</li>
-                )}
-              </ul>
+                  ))}
+                </ul>
+              )}
             </div>
           )}
 
-
+          {/* Reviews */}
           {activeSection === "reviews" && (
             <div>
               <h2>My Reviews and Ratings</h2>
@@ -487,6 +443,7 @@ const Account = () => {
             </div>
           )}
 
+          {/* Notifications */}
           {activeSection === "notifications" && (
             <div>
               <h2>Notifications</h2>

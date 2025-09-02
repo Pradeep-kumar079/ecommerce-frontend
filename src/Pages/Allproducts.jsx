@@ -1,10 +1,10 @@
-import React from 'react'
+import React from 'react';
 import Cloths from '../components/Cloths';
 import Electronics from '../components/Electronics';
-import HomeAppliances from '../Pages/HomeAppliances';
-import CombineProducts from './CombineProducts';
+import HomeAppliances from '../components/HomeAppliances';
+import CombineProducts from '../components/CombineProducts';
 
-const Allproducts = () => {
+const AllProducts = () => {
   return (
     <div>
       <Cloths />
@@ -12,8 +12,7 @@ const Allproducts = () => {
       <HomeAppliances />
       <CombineProducts />
     </div>
-  )
-}
+  );
+};
 
-export default Allproducts
-
+export default AllProducts;

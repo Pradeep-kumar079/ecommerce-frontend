@@ -7,9 +7,9 @@ import Navbar from '../components/Navbar';
 const Cart = () => {
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState(null); // ✅ store user details
+  const [user, setUser] = useState(null);
   const [loadingPayment, setLoadingPayment] = useState(false);
-   const APP_URL = process.env.REACT_APP_API_URL;
+  const APP_URL = process.env.REACT_APP_API_URL;
 
   // Fetch cart
   const fetchCart = async () => {
@@ -26,7 +26,7 @@ const Cart = () => {
     }
   };
 
-  // Fetch logged in user ✅
+  // Fetch logged in user
   const fetchUser = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -67,9 +67,65 @@ const Cart = () => {
     }
   };
 
+  // Handle Checkout
+  const handleCheckout = async () => {
+    if (!user) return alert("Please log in to continue.");
+    if (!cart?.items.length) return alert("Cart is empty.");
+
+    try {
+      setLoadingPayment(true);
+      const token = localStorage.getItem("token");
+      const totalAmount = cart.items.reduce(
+        (sum, item) => sum + (item.productId?.price || 0) * item.quantity,
+        0
+      );
+
+      const res = await axios.post(
+        `${APP_URL}/api/order/create`,
+        {
+          amount: totalAmount,
+          orderItems: cart.items.map(item => ({
+            product: item.productId?._id,
+            quantity: item.quantity,
+            price: item.productId?.price
+          })),
+          customer: {
+            customer_id: user._id,
+            customer_name: user.username,
+            customer_email: user.email,
+            customer_phone: user.phone,
+          },
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const { paymentSessionId } = res.data;
+
+      // Load Cashfree SDK once
+      if (!document.getElementById("cashfree-sdk")) {
+        const script = document.createElement("script");
+        script.id = "cashfree-sdk";
+        script.src = "https://sdk.cashfree.com/js/v3/cashfree.js";
+        script.onload = () => {
+          const cashfree = window.Cashfree({ mode: "sandbox" });
+          cashfree.checkout({ paymentSessionId, redirectTarget: "_self" });
+        };
+        document.body.appendChild(script);
+      } else {
+        const cashfree = window.Cashfree({ mode: "sandbox" });
+        cashfree.checkout({ paymentSessionId, redirectTarget: "_self" });
+      }
+
+    } catch (err) {
+      console.error(err.response?.data || err.message);
+    } finally {
+      setLoadingPayment(false);
+    }
+  };
+
   useEffect(() => {
     fetchCart();
-    fetchUser(); // ✅ also fetch user
+    fetchUser();
   }, []);
 
   if (loading) return <p>Loading cart...</p>;
@@ -81,13 +137,13 @@ const Cart = () => {
         {/* Cart Items */}
         <div className="cart_items">
           <h2>Your Cart</h2>
-          {cart && cart.items.length > 0 ? (
+          {cart?.items.length > 0 ? (
             cart.items.map((item, index) => (
               <div key={index} className="cart_item">
                 <div className="cart_image">
-                  {item.productId?.images && item.productId.images.length > 0 ? (
+                  {item.productId?.images?.[0] ? (
                     <img
-                      src={`${APP_URL}/${item.productId.images[0]}`}
+                      src={`${APP_URL.replace(/\/$/, '')}/${item.productId.images[0]}`}
                       alt={item.productId.name}
                     />
                   ) : (
@@ -142,65 +198,16 @@ const Cart = () => {
             ) || 0}
           </p>
 
-          {/* ✅ Cashfree Checkout */}
           <button
             className="checkout_btn"
-            onClick={async () => {
-              if (!user) return alert("Please log in to continue.");
-
-              try {
-                setLoadingPayment(true);
-                const token = localStorage.getItem("token");
-                const totalAmount = cart.items.reduce(
-                  (sum, item) => sum + (item.productId?.price || 0) * item.quantity,
-                  0
-                );
-
-                const res = await axios.post(
-                  `${APP_URL}/api/order/create`,
-                  {
-                    amount: totalAmount,
-                    orderItems: cart.items.map(item => ({
-                      product: item.productId._id,
-                      quantity: item.quantity,
-                      price: item.productId.price
-                    })),
-                    customer: {
-                      customer_id: user._id,
-                      customer_name: user.username,
-                      customer_email: user.email,
-                      customer_phone: user.phone,
-                    },
-                  },
-                  { headers: { Authorization: `Bearer ${token}` } }
-                );
-
-                const { paymentSessionId } = res.data;
-
-                // ✅ use Cashfree SDK instead of redirect
-                const script = document.createElement("script");
-                script.src = "https://sdk.cashfree.com/js/v3/cashfree.js";
-                script.onload = () => {
-                  const cashfree = window.Cashfree({ mode: "sandbox" });
-                  cashfree.checkout({ paymentSessionId, redirectTarget: "_self" });
-                };
-                document.body.appendChild(script);
-
-              } catch (err) {
-                console.error(err.response?.data || err.message);
-              } finally {
-                setLoadingPayment(false);
-              }
-            }}
-            disabled={loadingPayment}
+            onClick={handleCheckout}
+            disabled={loadingPayment || !cart?.items.length}
           >
             {loadingPayment ? "Processing..." : "Proceed to Checkout"}
           </button>
         </div>
 
-        <div className="extra-details">
-          <p>This is nothing bro</p>
-        </div>
+        <div className="extra-details"></div>
       </div>
     </div>
   );

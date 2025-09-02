@@ -11,12 +11,12 @@ import {
   faInfoCircle,
   faRightToBracket,
 } from '@fortawesome/free-solid-svg-icons';
+import { Link } from 'react-router-dom';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleMenu = () => setIsOpen(!isOpen);
-  const API_URL = process.env.REACT_APP_API_URL;
 
   return (
     <div className='navbar'>
@@ -31,34 +31,34 @@ const Navbar = () => {
           <h3>Hello, Pradeep</h3>
         </div>
         <li>
-          <a href={`${API_URL}/home`}>
+          <Link to="/">
             <FontAwesomeIcon icon={faHome} /> Home
-          </a>
+          </Link>
         </li>
         <li>
-          <a href={`${API_URL}/products`}>
+          <Link to="/products">
             <FontAwesomeIcon icon={faBox} /> Products
-          </a>
+          </Link>
         </li>
         <li>
-          <a href={`${API_URL}/about`}>
+          <Link to="/about">
             <FontAwesomeIcon icon={faInfoCircle} /> About
-          </a>
+          </Link>
         </li>
         <li>
-          <a href={`${API_URL}/account`}>
+          <Link to="/account">
             <FontAwesomeIcon icon={faUser} /> Account
-          </a>
+          </Link>
         </li>
         <li>
-          <a href={`${API_URL}/cart`}>
+          <Link to="/cart">
             <FontAwesomeIcon icon={faCartShopping} /> Cart
-          </a>
+          </Link>
         </li>
         <li>
-          <a href={`${API_URL}/logout`}>
+          <Link to="/logout">
             <FontAwesomeIcon icon={faRightToBracket} /> Logout
-          </a>
+          </Link>
         </li>
       </ul>
     </div>

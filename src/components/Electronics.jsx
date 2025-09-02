@@ -1,23 +1,25 @@
-import React from 'react'
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import ProductCard from './ProductCard';
 import './Electronic.css';
 
-
-
 const Electronics = () => {
   const [electronics, setElectronics] = useState([]);
-  const BASE_IMAGE_URL = process.env.REACT_APP_API_URL;
+  const BASE_IMAGE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+
+  const fetchElectronics = useCallback(async () => {
+    try {
+      const res = await axios.get(`${BASE_IMAGE_URL}/api/home/all-products`);
+      const electronicItems = res.data.filter(p => p.category === "electronics");
+      setElectronics(electronicItems);
+    } catch (err) {
+      console.error("Error fetching electronics:", err);
+    }
+  }, [BASE_IMAGE_URL]);
 
   useEffect(() => {
-    axios.get(`${BASE_IMAGE_URL}/api/home/all-products`)
-      .then(res => {
-        const electronicItems = res.data.filter(p => p.category === "electronics");
-        setElectronics(electronicItems);
-      })
-      .catch(err => console.error("Error fetching electronics:", err));
-  }, []);
+    fetchElectronics();
+  }, [fetchElectronics]);
 
   return (
     <div className="electronics-container">

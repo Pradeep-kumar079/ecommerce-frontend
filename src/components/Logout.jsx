@@ -1,18 +1,30 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const Logout = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Clear token or any session-related data
-    localStorage.removeItem('token'); // or sessionStorage.removeItem('token')
-    
-    // // Optional: clear other data like user info
-    // localStorage.removeItem('user');
+    const performLogout = async () => {
+      try {
+        // Optional: logout API call
+        // await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/logout`);
 
-    // Redirect to login
-    navigate('/login');
+        // Clear local/session storage
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        sessionStorage.clear(); // optional
+
+        // Redirect to login after a short delay
+        setTimeout(() => navigate('/login'), 500);
+      } catch (err) {
+        console.error("Logout failed:", err);
+        navigate('/login'); // fallback
+      }
+    };
+
+    performLogout();
   }, [navigate]);
 
   return (

@@ -7,9 +7,8 @@ const ManageProducts = () => {
   const [products, setProducts] = useState({});
   const [filteredProducts, setFilteredProducts] = useState({});
   const [loading, setLoading] = useState(true);
-   const APP_URL = process.env.REACT_APP_API_URL;
+  const APP_URL = process.env.REACT_APP_API_URL;
 
-  // Separate search states
   const [searchCategory, setSearchCategory] = useState("");
   const [searchType, setSearchType] = useState("");
   const [searchName, setSearchName] = useState("");
@@ -23,7 +22,7 @@ const ManageProducts = () => {
         return acc;
       }, {});
       setProducts(grouped);
-      setFilteredProducts(grouped); // initialize filtered
+      setFilteredProducts(grouped);
       setLoading(false);
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -35,7 +34,7 @@ const ManageProducts = () => {
     fetchProducts();
   }, []);
 
-  // Filter based on category, type, and name
+  // Filter products whenever search inputs change
   useEffect(() => {
     const filtered = Object.keys(products).reduce((acc, category) => {
       const matchedProducts = products[category].filter(product => 
@@ -43,7 +42,7 @@ const ManageProducts = () => {
         product.type.toLowerCase().includes(searchType.toLowerCase()) &&
         product.name.toLowerCase().includes(searchName.toLowerCase())
       );
-      if (matchedProducts.length > 0) acc[category] = matchedProducts;
+      if (matchedProducts.length) acc[category] = matchedProducts;
       return acc;
     }, {});
     setFilteredProducts(filtered);
@@ -55,27 +54,26 @@ const ManageProducts = () => {
     <div>
       <h2>Manage Products</h2>
 
-      {/* Search Inputs */}
       <div className="search-bar" style={{ marginBottom: "20px", display: "flex", gap: "10px" }}>
         <input
           type="text"
           placeholder="Search by Category"
           value={searchCategory}
-          onChange={(e) => setSearchCategory(e.target.value)}
+          onChange={e => setSearchCategory(e.target.value)}
           style={{ padding: "8px", borderRadius: "6px", border: "1px solid #ccc", flex: 1 }}
         />
         <input
           type="text"
           placeholder="Search by Type"
           value={searchType}
-          onChange={(e) => setSearchType(e.target.value)}
+          onChange={e => setSearchType(e.target.value)}
           style={{ padding: "8px", borderRadius: "6px", border: "1px solid #ccc", flex: 1 }}
         />
         <input
           type="text"
           placeholder="Search by Name"
           value={searchName}
-          onChange={(e) => setSearchName(e.target.value)}
+          onChange={e => setSearchName(e.target.value)}
           style={{ padding: "8px", borderRadius: "6px", border: "1px solid #ccc", flex: 1 }}
         />
       </div>
@@ -83,7 +81,7 @@ const ManageProducts = () => {
       {Object.keys(filteredProducts).length === 0 ? (
         <p>No products found.</p>
       ) : (
-        Object.keys(filteredProducts).map((category) => (
+        Object.keys(filteredProducts).map(category => (
           <div key={category} style={{ marginBottom: "2rem" }}>
             <h3>{category.charAt(0).toUpperCase() + category.slice(1)}</h3>
             <table border="1" cellPadding="10" cellSpacing="0">
@@ -101,7 +99,7 @@ const ManageProducts = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredProducts[category].map((product) => (
+                {filteredProducts[category].map(product => (
                   <tr key={product._id}>
                     <td>{product.category}</td>
                     <td>{product.type}</td>
@@ -127,12 +125,8 @@ const ManageProducts = () => {
                         ))}
                     </td>
                     <td>
-                      <Link to={`/admin/modify-product/${product._id}`}>
-                        <button>Edit</button>
-                      </Link>
-                      <Link to={`/admin/delete-product/${product._id}`}>
-                        <button>Delete</button>
-                      </Link>
+                      <Link to={`/admin/modify-product/${product._id}`}><button>Edit</button></Link>
+                      <Link to={`/admin/delete-product/${product._id}`}><button>Delete</button></Link>
                     </td>
                   </tr>
                 ))}

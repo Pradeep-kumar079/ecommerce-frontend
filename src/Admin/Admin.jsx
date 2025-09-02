@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './Admin.css';
 import { Link } from 'react-router-dom';
 import { FaUsers, FaPlus, FaBoxOpen, FaShoppingCart, FaSignOutAlt } from 'react-icons/fa';
@@ -7,9 +7,10 @@ import axios from 'axios';
 const Admin = () => {
   const [products, setProducts] = useState({});
   const [loading, setLoading] = useState(true);
-  const APP_URL = process.env.REACT_APP_API_URL;
+  const APP_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
-  const fetchProducts = async () => {
+  // useCallback ensures fetchProducts identity doesn't change, preventing useEffect warnings
+  const fetchProducts = useCallback(async () => {
     try {
       const response = await axios.get(`${APP_URL}/api/admin/allproducts`);
       const grouped = response.data.reduce((acc, product) => {
@@ -18,20 +19,19 @@ const Admin = () => {
         return acc;
       }, {});
       setProducts(grouped);
-      setLoading(false);
     } catch (error) {
       console.error("Error fetching products:", error);
+    } finally {
       setLoading(false);
     }
-  };
+  }, [APP_URL]);
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [fetchProducts]);
 
   return (
     <div className='admin-dashboard'>
-      
       {/* Sidebar */}
       <div className="dashboard">
         <ul>

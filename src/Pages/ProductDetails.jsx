@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom'; // ✅ Added Link
+import { useParams, Link } from 'react-router-dom';
+import axios from 'axios';
 import './ProductDetails.css';
 import Navbar from '../components/Navbar';
 
@@ -10,115 +11,105 @@ const ProductDetails = () => {
   const [user, setUser] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [relatedProducts, setRelatedProducts] = useState([]);
-
   const BASE_IMAGE_URL = process.env.REACT_APP_API_URL;
 
- useEffect(() => {
-    // fetch product
-    fetch(`${BASE_IMAGE_URL}/api/home/all-products/${id}`)
-      .then(res => res.json())
-      .then(data => {
-        setProduct(data);
-
-        //  fetch related products by category (or type)
-        if (data.category) {
-          fetch(`${BASE_IMAGE_URL}/api/home/products?category=${data.category}`)
-            .then(res => res.json())
-            .then(related => {
-              // filter out current product
-              const filtered = related.filter(rp => rp._id !== data._id);
-              setRelatedProducts(filtered);
-            })
-            .catch(err => console.error("Failed to fetch related products:", err));
-        }
-      })
-      .catch(err => console.error("Failed to fetch product:", err));
-  }, [id]);
-
+  // Fetch product, related products, and user
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    fetch(`${BASE_IMAGE_URL}/api/user/`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(res => res.json())
-      .then(data => setUser(data))
-      .catch(err => console.error("Failed to fetch user:", err));
-  }, []);
+    const fetchData = async () => {
+      try {
+        // Fetch product
+        const { data: productData } = await axios.get(`${BASE_IMAGE_URL}/api/home/all-products/${id}`);
+        setProduct(productData);
 
-const handleBuy = async () => {
-  if (!user) return alert("Please log in to continue.");
+        // Fetch related products
+        if (productData.category) {
+          const { data: related } = await axios.get(
+            `${BASE_IMAGE_URL}/api/home/products?category=${productData.category}`
+          );
+          const filtered = related.filter(rp => rp._id !== productData._id);
+          setRelatedProducts(filtered);
+        }
 
-  setLoadingPayment(true);
-  try {
-    const token = localStorage.getItem("token"); // ✅ add token
-    const res = await fetch(`${BASE_IMAGE_URL}/api/order/create`, {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`, // ✅ send JWT
-      },
-      body: JSON.stringify({
-        amount: product.price,
-        customer: {
-          customer_id: user._id,
-          customer_name: user.username,
-          customer_email: user.email,
-          customer_phone: user.phone,
-        },
-        orderItems: [
-          {
-            product: product._id,
-            quantity: 1,
-            price: product.price,
-          },
-        ],
-      }),
-    });
-
-    if (!res.ok) {
-      throw new Error("Unauthorized / Failed to create order");
-    }
-
-    const { paymentSessionId } = await res.json();
-
-    // ✅ Load Cashfree SDK
-    const script = document.createElement("script");
-    script.src = "https://sdk.cashfree.com/js/v3/cashfree.js";
-    script.onload = () => {
-      const cashfree = window.Cashfree({ mode: "sandbox" });
-      cashfree.checkout({ paymentSessionId, redirectTarget: "_self" });
+        // Fetch user if token exists
+        const token = localStorage.getItem('token');
+        if (token) {
+          const { data: userData } = await axios.get(`${BASE_IMAGE_URL}/api/user/`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          setUser(userData);
+        }
+      } catch (err) {
+        console.error("Failed to fetch product, related products, or user:", err);
+      }
     };
-    document.body.appendChild(script);
-  } catch (err) {
-    console.error("Error initiating payment", err);
-    alert("Payment initialization failed. Please log in again.");
-  } finally {
-    setLoadingPayment(false);
-  }
-};
 
+    fetchData();
+  }, [id, BASE_IMAGE_URL]);
+
+  const handleBuy = async () => {
+    if (!user) return alert("Please log in to continue.");
+    if (!product.price) return alert("Product price not available.");
+
+    setLoadingPayment(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.post(
+        `${BASE_IMAGE_URL}/api/order/create`,
+        {
+          amount: product.price,
+          customer: {
+            customer_id: user._id,
+            customer_name: user.username,
+            customer_email: user.email,
+            customer_phone: user.phone,
+          },
+          orderItems: [
+            {
+              product: product._id,
+              quantity: 1,
+              price: product.price,
+            },
+          ],
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const { paymentSessionId } = res.data;
+
+      const script = document.createElement("script");
+      script.src = "https://sdk.cashfree.com/js/v3/cashfree.js";
+      script.onload = () => {
+        const cashfree = window.Cashfree({ mode: "sandbox" });
+        cashfree.checkout({ paymentSessionId, redirectTarget: "_self" });
+      };
+      document.body.appendChild(script);
+    } catch (err) {
+      console.error("Error initiating payment", err);
+      alert("Payment initialization failed. Please log in again.");
+    } finally {
+      setLoadingPayment(false);
+    }
+  };
 
   if (!product) return <div>Loading...</div>;
 
-  // normalize images
-  const images = Array.isArray(product.images)
-    ? product.images
-    : product.images.split(",");
+  const images = product.images
+    ? Array.isArray(product.images)
+      ? product.images
+      : product.images.split(",")
+    : [];
 
-  
   return (
     <>
       <Navbar />
       <div className="single-product">
-        {/* --- IMAGE GALLERY --- */}
         <div className="product-left-container">
           <div className="gallery">
             <img
-              src={`${BASE_IMAGE_URL}${images[currentIndex].trim()}`}
+              src={`${BASE_IMAGE_URL}${images[currentIndex]?.trim()}`}
               alt={`${product.name}-${currentIndex}`}
               className="main-image"
             />
-
             <div className="thumbnails">
               {images.map((img, index) => (
                 <img
@@ -133,35 +124,33 @@ const handleBuy = async () => {
           </div>
 
           <div className="related-products">
-  <h4>Related Products:</h4>
-  <div className="related-grid">
-    {relatedProducts.length > 0 ? (
-      relatedProducts.map((relatedProduct) => (
-        <Link 
-          key={relatedProduct._id} 
-          to={`/product/${relatedProduct._id}`} 
-          className="related-card"
-        >
-          <img
-            src={`${BASE_IMAGE_URL}${Array.isArray(relatedProduct.images) 
-              ? relatedProduct.images[0] 
-              : relatedProduct.images.split(",")[0]}`}
-            alt={relatedProduct.name}
-          />
-          <div className="related-info">
-            <h5>{relatedProduct.name}</h5>
-            <p>₹{relatedProduct.price}</p>
+            <h4>Related Products:</h4>
+            <div className="related-grid">
+              {relatedProducts.length > 0 ? (
+                relatedProducts.map(rp => (
+                  <Link 
+                    key={rp._id} 
+                    to={`/product/${rp._id}`} 
+                    className="related-card"
+                    onClick={() => window.scrollTo(0, 0)}
+                  >
+                    <img
+                      src={`${BASE_IMAGE_URL}${
+                        Array.isArray(rp.images) ? rp.images[0] : rp.images.split(",")[0]
+                      }`}
+                      alt={rp.name}
+                    />
+                    <div className="related-info">
+                      <h5>{rp.name}</h5>
+                      <p>₹{rp.price}</p>
+                    </div>
+                  </Link>
+                ))
+              ) : (
+                <p>No related products found.</p>
+              )}
+            </div>
           </div>
-        </Link>
-      ))
-    ) : (
-      <p>No related products found.</p>
-    )}
-  </div>
-</div>
-
-
-
         </div>
 
         <div className="product-container">
@@ -185,8 +174,8 @@ const handleBuy = async () => {
                 </ul>
               </div>
             )}
-            <button onClick={handleBuy} disabled={loadingPayment}>
-              {loadingPayment ? "Processing..." : "Buy"}
+            <button onClick={handleBuy} disabled={loadingPayment || product.stock <= 0}>
+              {loadingPayment ? "Processing..." : product.stock <= 0 ? "Out of Stock" : "Buy"}
             </button>
           </div>
 

@@ -8,13 +8,18 @@ const Toys = () => {
   const [toys, setToys] = useState([]);
 
   useEffect(() => {
-    axios.get(`${BASE_IMAGE_URL}/api/home/all-products`)
-      .then(res => {
+    const fetchToys = async () => {
+      try {
+        const res = await axios.get(`${BASE_IMAGE_URL}/api/home/all-products`);
         const toyItems = res.data.filter(p => p.category === "toys");
         setToys(toyItems);
-      })
-      .catch(err => console.error("Error fetching toys:", err));
-  }, []);
+      } catch (err) {
+        console.error("Error fetching toys:", err);
+      }
+    };
+
+    fetchToys();
+  }, [BASE_IMAGE_URL]);
 
   return (
     <div className="toys-container">
@@ -28,7 +33,7 @@ const Toys = () => {
         ))}
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default Toys;

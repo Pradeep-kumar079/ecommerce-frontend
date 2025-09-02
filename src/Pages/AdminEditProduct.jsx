@@ -3,11 +3,20 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const AdminEditProduct = () => {
-  const [product, setProduct] = useState({ name: '', price: 0, description: '', category: '', type: '' });
+  const [product, setProduct] = useState({
+    name: '',
+    price: 0,
+    description: '',
+    category: '',
+    type: '',
+    stock: 0,
+    attributes: {},
+  });
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
-   const APP_URL = process.env.REACT_APP_API_URL;
+  const [error, setError] = useState(null);
 
+  const navigate = useNavigate();
+  const APP_URL = process.env.REACT_APP_API_URL;
   const productId = window.location.pathname.split("/").pop();
 
   // Fetch product details
@@ -15,31 +24,33 @@ const AdminEditProduct = () => {
     try {
       const response = await axios.get(`${APP_URL}/api/admin/product/${id}`);
       setProduct(response.data);
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching product:", error);
+    } catch (err) {
+      console.error("Error fetching product:", err);
+      setError("Failed to fetch product");
+    } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchProduct(productId);
+    if (productId) fetchProduct(productId);
   }, [productId]);
 
-  // Update product
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await axios.put(`${APP_URL}/api/admin/modify-product/${product._id}`, product);
-      alert("Product updated successfully");
-      navigate("/manage-products");
-    } catch (error) {
-      console.error("Error updating product:", error);
-      alert("Failed to update product");
+      alert("✅ Product updated successfully");
+      navigate("/admin/manage-products");
+    } catch (err) {
+      console.error("Error updating product:", err);
+      alert("❌ Failed to update product");
     }
   };
 
   if (loading) return <p>Loading product...</p>;
+  if (error) return <p style={{ color: "red" }}>{error}</p>;
 
   return (
     <div>
@@ -54,14 +65,14 @@ const AdminEditProduct = () => {
           />
         </div>
 
-         <div>
+        <div>
           <label>Type:</label>
           <input
             type="text"
             value={product.type}
             onChange={(e) => setProduct({ ...product, type: e.target.value })}
           />
-         </div>
+        </div>
 
         <div>
           <label>Name:</label>
@@ -71,21 +82,22 @@ const AdminEditProduct = () => {
             onChange={(e) => setProduct({ ...product, name: e.target.value })}
           />
         </div>
+
         <div>
           <label>Price:</label>
           <input
             type="number"
             value={product.price}
-            onChange={(e) => setProduct({ ...product, price: e.target.value })}
+            onChange={(e) => setProduct({ ...product, price: Number(e.target.value) })}
           />
         </div>
 
         <div>
-          <label>Stock :</label>
+          <label>Stock:</label>
           <input
             type="number"
             value={product.stock}
-            onChange={(e) => setProduct({ ...product, stock: e.target.value })}
+            onChange={(e) => setProduct({ ...product, stock: Number(e.target.value) })}
           />
         </div>
 
@@ -98,10 +110,16 @@ const AdminEditProduct = () => {
         </div>
 
         <div>
-          <label>Attributes:</label>
+          <label>Attributes (JSON):</label>
           <textarea
             value={JSON.stringify(product.attributes, null, 2)}
-            onChange={(e) => setProduct({ ...product, attributes: JSON.parse(e.target.value) })}
+            onChange={(e) => {
+              try {
+                setProduct({ ...product, attributes: JSON.parse(e.target.value) });
+              } catch {
+                // Invalid JSON, do nothing or optionally show error
+              }
+            }}
           />
         </div>
 
