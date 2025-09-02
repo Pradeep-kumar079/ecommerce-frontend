@@ -18,6 +18,7 @@ const Account = () => {
 
   const [orders, setOrders] = useState([]);
   const [cartItems , setCartItems] = useState([]);
+  const REACT_APP_API_URL = process.env.REACT_APP_API_URL;
 
     useEffect(() => {
       const fetchUser = async () => {
@@ -25,7 +26,7 @@ const Account = () => {
           const token = localStorage.getItem("token");
           if (!token) return;
 
-          const res = await fetch("http://localhost:5000/api/user/", {
+          const res = await fetch(`${REACT_APP_API_URL}/api/user/`, {
             headers: { Authorization: `Bearer ${token}` },
           });
 
@@ -69,7 +70,7 @@ const Account = () => {
           return;
         }
 
-        const res = await fetch("http://localhost:5000/api/user/", {
+        const res = await fetch(`${REACT_APP_API_URL}/api/user/`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -104,7 +105,7 @@ const Account = () => {
           return;
         }
 
-        const response = await fetch("http://localhost:5000/api/user/get-orders", {
+        const response = await fetch(`${REACT_APP_API_URL}/api/user/get-orders`, {
           method: "GET",
           headers: {
             "Authorization": `Bearer ${token}`,
@@ -133,7 +134,7 @@ const Account = () => {
           return;
         }
 
-        const response = await fetch("http://localhost:5000/api/cart/", {
+        const response = await fetch(`${REACT_APP_API_URL}/api/cart/`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -157,16 +158,7 @@ const Account = () => {
          return;
        }
 
-      //  const res = await fetch("http://localhost:5000/api/user/", {
-      //    method: "PUT",
-      //    headers: {
-      //      "Content-Type": "application/json",
-      //      Authorization: `Bearer ${token}`,
-      //    },
-      //    body: JSON.stringify(user),
-      //  });
-
-      const res = await fetch("http://localhost:5000/api/user/", {
+      const res = await fetch(`${REACT_APP_API_URL}/api/user/`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -409,7 +401,7 @@ const Account = () => {
           {item.product ? (
             <>
               <img
-                src={`http://localhost:5000${item.product.images}`}
+                src={`${REACT_APP_API_URL}${item.product.images}`}
                 alt={item.product.name}
               />
               <div className="product-details">

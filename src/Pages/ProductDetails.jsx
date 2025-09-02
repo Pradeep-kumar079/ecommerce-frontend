@@ -11,17 +11,18 @@ const ProductDetails = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [relatedProducts, setRelatedProducts] = useState([]);
 
-  const BASE_IMAGE_URL = "http://localhost:5000";
+  const BASE_IMAGE_URL = "https://ecommerce-backend-4hva.onrender.com";
+
  useEffect(() => {
     // fetch product
-    fetch(`http://localhost:5000/api/home/all-products/${id}`)
+    fetch(`${BASE_IMAGE_URL}/api/home/all-products/${id}`)
       .then(res => res.json())
       .then(data => {
         setProduct(data);
 
-        // ✅ fetch related products by category (or type)
+        //  fetch related products by category (or type)
         if (data.category) {
-          fetch(`http://localhost:5000/api/home/products?category=${data.category}`)
+          fetch(`${BASE_IMAGE_URL}/api/home/products?category=${data.category}`)
             .then(res => res.json())
             .then(related => {
               // filter out current product
@@ -36,7 +37,7 @@ const ProductDetails = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    fetch('http://localhost:5000/api/user/', {
+    fetch(`${BASE_IMAGE_URL}/api/user/`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -50,7 +51,7 @@ const handleBuy = async () => {
   setLoadingPayment(true);
   try {
     const token = localStorage.getItem("token"); // ✅ add token
-    const res = await fetch("http://localhost:5000/api/order/create", {
+    const res = await fetch(`${BASE_IMAGE_URL}/api/order/create`, {
       method: "POST",
       headers: { 
         "Content-Type": "application/json",

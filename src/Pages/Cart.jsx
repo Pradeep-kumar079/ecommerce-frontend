@@ -14,7 +14,7 @@ const Cart = () => {
   const fetchCart = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/cart', {
+      const res = await axios.get('https://ecommerce-backend-4hva.onrender.com/api/cart', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setCart(res.data.cart);
@@ -29,7 +29,7 @@ const Cart = () => {
   const fetchUser = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/api/user/", {
+      const res = await axios.get("https://ecommerce-backend-4hva.onrender.com/api/user/", {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUser(res.data);
@@ -43,7 +43,7 @@ const Cart = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.put(
-        `http://localhost:5000/api/cart/update`,
+        `https://ecommerce-backend-4hva.onrender.com/api/cart/update`,
         { productId, action },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -57,7 +57,7 @@ const Cart = () => {
   const removeFromCart = async (productId) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:5000/api/cart/remove/${productId}`, {
+      await axios.delete(`https://ecommerce-backend-4hva.onrender.com/api/cart/remove/${productId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchCart();
@@ -86,7 +86,7 @@ const Cart = () => {
                 <div className="cart_image">
                   {item.productId?.images && item.productId.images.length > 0 ? (
                     <img
-                      src={`http://localhost:5000/${item.productId.images[0]}`}
+                      src={`https://ecommerce-backend-4hva.onrender.com/${item.productId.images[0]}`}
                       alt={item.productId.name}
                     />
                   ) : (
@@ -156,7 +156,7 @@ const Cart = () => {
                 );
 
                 const res = await axios.post(
-                  "http://localhost:5000/api/order/create", 
+                  "https://ecommerce-backend-4hva.onrender.com/api/order/create",
                   {
                     amount: totalAmount,
                     orderItems: cart.items.map(item => ({

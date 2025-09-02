@@ -5,7 +5,7 @@ import './HomeAppliances.css';
 
 const HomeAppliances = () => {
   const [homeAppliances, setHomeAppliances] = useState([]);
-  const BASE_IMAGE_URL = "http://localhost:5000"; // include host
+  const BASE_IMAGE_URL = "https://ecommerce-backend-4hva.onrender.com"; // include host
 
   useEffect(() => {
     axios.get(`${BASE_IMAGE_URL}/api/home/all-products`)

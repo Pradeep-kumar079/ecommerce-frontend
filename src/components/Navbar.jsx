@@ -16,6 +16,7 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleMenu = () => setIsOpen(!isOpen);
+  const API_URL = process.env.REACT_APP_API_URL;
 
   return (
     <div className='navbar'>
@@ -29,12 +30,36 @@ const Navbar = () => {
         <div className="nameblock">
           <h3>Hello, Pradeep</h3>
         </div>
-        <li><a href='http://localhost:3000/home'><FontAwesomeIcon icon={faHome} /> Home</a></li>
-        <li><a href='http://localhost:3000/products'><FontAwesomeIcon icon={faBox} /> Products</a></li>
-        <li><a href='http://localhost:3000/about'><FontAwesomeIcon icon={faInfoCircle} /> About</a></li>
-        <li><a href='http://localhost:3000/account'><FontAwesomeIcon icon={faUser} /> Account</a></li>
-        <li><a href='http://localhost:3000/cart'><FontAwesomeIcon icon={faCartShopping} /> Cart</a></li>
-        <li><a href='http://localhost:3000/logout'><FontAwesomeIcon icon={faRightToBracket} /> Logout</a></li>
+        <li>
+          <a href={`${API_URL}/home`}>
+            <FontAwesomeIcon icon={faHome} /> Home
+          </a>
+        </li>
+        <li>
+          <a href={`${API_URL}/products`}>
+            <FontAwesomeIcon icon={faBox} /> Products
+          </a>
+        </li>
+        <li>
+          <a href={`${API_URL}/about`}>
+            <FontAwesomeIcon icon={faInfoCircle} /> About
+          </a>
+        </li>
+        <li>
+          <a href={`${API_URL}/account`}>
+            <FontAwesomeIcon icon={faUser} /> Account
+          </a>
+        </li>
+        <li>
+          <a href={`${API_URL}/cart`}>
+            <FontAwesomeIcon icon={faCartShopping} /> Cart
+          </a>
+        </li>
+        <li>
+          <a href={`${API_URL}/logout`}>
+            <FontAwesomeIcon icon={faRightToBracket} /> Logout
+          </a>
+        </li>
       </ul>
     </div>
   );

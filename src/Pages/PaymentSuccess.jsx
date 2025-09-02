@@ -10,7 +10,7 @@ export default function PaymentSuccess() {
 
   useEffect(() => {
     if (orderId) {
-      fetch(`http://localhost:5000/api/order/verify-payment?order_id=${orderId}`)
+      fetch(`https://ecommerce-backend-4hva.onrender.com/api/order/verify-payment?order_id=${orderId}`)
         .then((res) => res.json())
         .then((data) => setOrderDetails(data))
         .catch((err) => console.error(err));
