@@ -85,6 +85,7 @@ const Addproduct = () => {
     attributes: {},
   });
 
+  const APP_URL = process.env.REACT_APP_API_URL;
   const handleChange = (e) => {
     const { name, value } = e.target;
     setProduct((prev) => ({
@@ -123,7 +124,7 @@ const Addproduct = () => {
 
     try {
       const response = await axios.post(
-        "https://ecommerce-backend-4hva.onrender.com/api/admin/add-product",
+        `${APP_URL}/api/admin/add-product`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );

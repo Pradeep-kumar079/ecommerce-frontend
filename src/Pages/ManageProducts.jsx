@@ -7,6 +7,7 @@ const ManageProducts = () => {
   const [products, setProducts] = useState({});
   const [filteredProducts, setFilteredProducts] = useState({});
   const [loading, setLoading] = useState(true);
+   const APP_URL = process.env.REACT_APP_API_URL;
 
   // Separate search states
   const [searchCategory, setSearchCategory] = useState("");
@@ -15,7 +16,7 @@ const ManageProducts = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get("https://ecommerce-backend-4hva.onrender.com/api/admin/allproducts");
+      const response = await axios.get(`${APP_URL}/api/admin/allproducts`);
       const grouped = response.data.reduce((acc, product) => {
         if (!acc[product.category]) acc[product.category] = [];
         acc[product.category].push(product);
@@ -119,7 +120,7 @@ const ManageProducts = () => {
                         product.images.map((img, idx) => (
                           <img
                             key={idx}
-                            src={`https://ecommerce-backend-4hva.onrender.com${img}`}
+                            src={`${APP_URL}${img}`}
                             alt={product.name}
                             style={{ width: "50px", marginRight: "5px" }}
                           />

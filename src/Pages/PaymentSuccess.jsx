@@ -5,12 +5,13 @@ export default function PaymentSuccess() {
   const location = useLocation();
   const query = new URLSearchParams(location.search);
   const orderId = query.get("order_id");
+   const APP_URL = process.env.REACT_APP_API_URL;
 
   const [orderDetails, setOrderDetails] = useState(null);
 
   useEffect(() => {
     if (orderId) {
-      fetch(`https://ecommerce-backend-4hva.onrender.com/api/order/verify-payment?order_id=${orderId}`)
+      fetch(`${APP_URL}/api/order/verify-payment?order_id=${orderId}`)
         .then((res) => res.json())
         .then((data) => setOrderDetails(data))
         .catch((err) => console.error(err));
@@ -18,12 +19,12 @@ export default function PaymentSuccess() {
   }, [orderId]);
 
   if (!orderId) {
-    return <h2>No order details found in URL ❌</h2>;
+    return <h2>No order details found in URL </h2>;
   }
 
   return (
     <div style={{ padding: "20px" }}>
-      <h1>Payment Success ✅</h1>
+      <h1>Payment Success </h1>
       {orderDetails ? (
         <>
           <p><strong>Order ID:</strong> {orderDetails.order_id}</p>

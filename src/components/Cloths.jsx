@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 
 const Cloths = () => {
   const [cloths, setCloths] = useState([]);
-  const BASE_IMAGE_URL = "https://ecommerce-backend-4hva.onrender.com"; // include host
+  const BASE_IMAGE_URL = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
     axios.get(`${BASE_IMAGE_URL}/api/home/all-products`)

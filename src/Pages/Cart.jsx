@@ -9,12 +9,13 @@ const Cart = () => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null); // ✅ store user details
   const [loadingPayment, setLoadingPayment] = useState(false);
+   const APP_URL = process.env.REACT_APP_API_URL;
 
   // Fetch cart
   const fetchCart = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('https://ecommerce-backend-4hva.onrender.com/api/cart', {
+      const res = await axios.get(`${APP_URL}/api/cart`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setCart(res.data.cart);
@@ -29,7 +30,7 @@ const Cart = () => {
   const fetchUser = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("https://ecommerce-backend-4hva.onrender.com/api/user/", {
+      const res = await axios.get(`${APP_URL}/api/user/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUser(res.data);
@@ -43,7 +44,7 @@ const Cart = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.put(
-        `https://ecommerce-backend-4hva.onrender.com/api/cart/update`,
+        `${APP_URL}/api/cart/update`,
         { productId, action },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -57,7 +58,7 @@ const Cart = () => {
   const removeFromCart = async (productId) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`https://ecommerce-backend-4hva.onrender.com/api/cart/remove/${productId}`, {
+      await axios.delete(`${APP_URL}/api/cart/remove/${productId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchCart();
@@ -86,7 +87,7 @@ const Cart = () => {
                 <div className="cart_image">
                   {item.productId?.images && item.productId.images.length > 0 ? (
                     <img
-                      src={`https://ecommerce-backend-4hva.onrender.com/${item.productId.images[0]}`}
+                      src={`${APP_URL}/${item.productId.images[0]}`}
                       alt={item.productId.name}
                     />
                   ) : (
@@ -156,7 +157,7 @@ const Cart = () => {
                 );
 
                 const res = await axios.post(
-                  "https://ecommerce-backend-4hva.onrender.com/api/order/create",
+                  `${APP_URL}/api/order/create`,
                   {
                     amount: totalAmount,
                     orderItems: cart.items.map(item => ({

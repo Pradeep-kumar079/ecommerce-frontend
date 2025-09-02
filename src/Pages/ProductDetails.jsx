@@ -11,7 +11,7 @@ const ProductDetails = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [relatedProducts, setRelatedProducts] = useState([]);
 
-  const BASE_IMAGE_URL = "https://ecommerce-backend-4hva.onrender.com";
+  const BASE_IMAGE_URL = process.env.REACT_APP_API_URL;
 
  useEffect(() => {
     // fetch product

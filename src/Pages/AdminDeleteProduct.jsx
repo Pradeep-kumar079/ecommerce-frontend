@@ -8,10 +8,11 @@ const AdminDeleteProduct = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const productId = window.location.pathname.split("/").pop();
+   const APP_URL = process.env.REACT_APP_API_URL;
 
   const fetchProduct = async (id) => {
     try {
-      const response = await axios.get(`https://ecommerce-backend-4hva.onrender.com/api/admin/product/${id}`);
+      const response = await axios.get(`${APP_URL}/api/admin/product/${id}`);
       setProduct(response.data);
       setLoading(false);
     } catch (err) {
@@ -25,10 +26,12 @@ const AdminDeleteProduct = () => {
     fetchProduct(productId);
   }, [productId]);
 
+ 
+
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
     try {
-      await axios.delete(`https://ecommerce-backend-4hva.onrender.com/api/admin/delete-product/${id}`);
+      await axios.delete(`${APP_URL}/api/admin/delete-product/${id}`);
       alert("Product deleted successfully!");
       navigate("/admin/manage-products");
     } catch (err) {

@@ -7,10 +7,11 @@ import axios from 'axios';
 const Admin = () => {
   const [products, setProducts] = useState({});
   const [loading, setLoading] = useState(true);
+  const APP_URL = process.env.REACT_APP_API_URL;
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get("https://ecommerce-backend-4hva.onrender.com/api/admin/allproducts");
+      const response = await axios.get(`${APP_URL}/api/admin/allproducts`);
       const grouped = response.data.reduce((acc, product) => {
         if (!acc[product.category]) acc[product.category] = [];
         acc[product.category].push(product);

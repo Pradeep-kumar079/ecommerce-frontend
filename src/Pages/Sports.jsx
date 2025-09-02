@@ -4,7 +4,7 @@ import ProductCard from '../components/ProductCard';
 import './Sports.css';
 
 const Sports = () => {
-  const BASE_IMAGE_URL = "https://ecommerce-backend-4hva.onrender.com"; // include host
+  const BASE_IMAGE_URL = process.env.REACT_APP_API_URL; // include host
   const [sportsProducts, setSportsProducts] = useState([]);
 
   useEffect(() => {

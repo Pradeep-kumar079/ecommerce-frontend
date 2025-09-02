@@ -3,7 +3,8 @@ import { FaHeart } from "react-icons/fa";
 import "./ProductCard.css";
 import { Link } from "react-router-dom";
 
-const ProductCard = ({ product, BASE_IMAGE_URL = "https://ecommerce-backend-4hva.onrender.com" }) => {
+const APP_URL = process.env.REACT_APP_API_URL;
+const ProductCard = ({ product, BASE_IMAGE_URL = APP_URL }) => {
   const [liked, setLiked] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -15,7 +16,7 @@ const ProductCard = ({ product, BASE_IMAGE_URL = "https://ecommerce-backend-4hva
 
       // 👇 send product to backend
       const token = localStorage.getItem("token"); // ensure user logged in
-      const res = await fetch("https://ecommerce-backend-4hva.onrender.com/api/cart/add-product", {
+      const res = await fetch(`${APP_URL}/api/cart/add-product`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

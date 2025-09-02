@@ -6,13 +6,14 @@ const AdminEditProduct = () => {
   const [product, setProduct] = useState({ name: '', price: 0, description: '', category: '', type: '' });
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+   const APP_URL = process.env.REACT_APP_API_URL;
 
   const productId = window.location.pathname.split("/").pop();
 
   // Fetch product details
   const fetchProduct = async (id) => {
     try {
-      const response = await axios.get(`https://ecommerce-backend-4hva.onrender.com/api/admin/product/${id}`);
+      const response = await axios.get(`${APP_URL}/api/admin/product/${id}`);
       setProduct(response.data);
       setLoading(false);
     } catch (error) {
@@ -29,7 +30,7 @@ const AdminEditProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`https://ecommerce-backend-4hva.onrender.com/api/admin/modify-product/${product._id}`, product);
+      await axios.put(`${APP_URL}/api/admin/modify-product/${product._id}`, product);
       alert("Product updated successfully");
       navigate("/manage-products");
     } catch (error) {
